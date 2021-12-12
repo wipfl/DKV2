@@ -377,7 +377,7 @@ bool executeSql(const QString& sql, /*const QVector<QVariant>& v,*/ QVector<QSql
 {
     QSqlQuery q; q.setForwardOnly(true);
     if( not q.prepare(sql)) {
-        qDebug() << "Faild to prep Query. Error:" << q.lastError();
+        qDebug() << "Faild to prep Query. Error:" << q.lastError() << Qt::endl << q.lastQuery ();
         return false;
     }
 //    for( int i =0; i<v.size(); i++) {

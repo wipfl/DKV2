@@ -101,8 +101,6 @@ private slots:
 
     void on_action_cmenu_go_contracts_triggered();
 
-    void on_action_menu_contracts_annual_interest_settlement_triggered();
-
     void on_action_menu_database_configure_outdir_triggered();
 
     void on_action_menu_contracts_print_lists_triggered();
@@ -184,21 +182,29 @@ private slots:
 
     void on_action_cmenu_Vertraege_anzeigen_triggered();
 
+    void on_action_Durchfuehren_triggered();
+
+    void on_action_JEA_Briefe_triggered();
+
+
+    void on_cbYear_currentIndexChanged(int index);
+
+    void on_cbKennungen_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
     void prepare_CreditorsListPage();
     void prepare_deleted_contracts_list_view();
     void prepare_valid_contracts_list_view();
     void prepare_contracts_list_view();
+    void prepare_jea_briefe_page(const QVector<int>& years);
     void getDatesFromContractStates();
     void prepare_statisticsPage();
     void fillStatisticsTableView();
     void prepare_investmentsListView();
     void prepare_startPage();
-    void prepare_printPreview();
+    void prepare_printPreview(qlonglong bookingId);
 
-    QVector<booking> toBePrinted;
-    QVector<booking>::const_iterator currentBooking;
     QString askUserForNextDb();
     QString findValidDatabaseToUse();
     bool useDb(const QString& dbfile);

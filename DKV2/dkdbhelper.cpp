@@ -461,3 +461,41 @@ UNION ALL
 )str")};
     return getBookingDateInfoBySql(sql, dates);
 }
+
+////////////////////
+/// für Briefe Druck / Jahresabschluss
+///
+QVector<int> abrechnungsJahre()
+{
+    QVector<int> years;
+    QString sql{qsl("SELECT DISTINCT SUBSTR(Datum, 1, 4) AS year FROM Buchungen WHERE BuchungsArt =%1 ORDER BY year DESC")
+                .arg (booking::bookingTypeToInt(booking::Type::annualInterestDeposit))};
+    QVector<QSqlRecord> vYears;
+    if( executeSql (sql, vYears)) {
+        for (const QSqlRecord& year : qAsConst(vYears)) {
+            years.push_back (year.value (0).toInt ());
+        }
+    } else {
+        qCritical() << "error reading annual settlement years from db";
+    }
+    return years;
+}
+
+QVector<QPair<qlonglong, QString>> kennungenVonAbrechnungsjahr(int year)
+{   LOG_CALL_W(QString::number(year));
+    QVector<QSqlRecord> sqlr;
+    QString sql {qsl("SELECT Buchungen.id, Vertraege.Kennung "
+                     " FROM Buchungen INNER JOIN Vertraege ON Buchungen.VertragsId = Vertraege.id "
+                     " WHERE Buchungen.BuchungsArt = %1 AND SUBSTR(Buchungen.Datum, 1, 4) = '%2'")
+                 .arg(QString::number(booking::bookingTypeToInt(booking::Type::annualInterestDeposit)), QString::number(year))};
+    qDebug() << sql;
+    QVector<QPair<qlonglong, QString>> kennungen;
+    if( executeSql(sql, sqlr)) {
+        for(const QSqlRecord& record : qAsConst(sqlr)) {
+            kennungen.push_back (QPair<qlonglong, QString>(record.value(0).toLongLong (), record.value(1).toString ()));
+        }
+    } else {
+        qCritical() << "error reading Kennungen from db";
+    }
+    return kennungen;
+}

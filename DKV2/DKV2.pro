@@ -102,12 +102,13 @@ SOURCES += \
         helpersql.cpp \
         ibanvalidator.cpp \
         investment.cpp \
-        letters.cpp \
+        letter.cpp \
         lettersnippets.cpp \
         main.cpp \
         mainwindow.cpp \
         mainwindow_contractlist.cpp \
         mainwindow_creditorlist.cpp \
+        mainwindow_jea_briefe.cpp \
         tabledatainserter.cpp \
         transaktionen.cpp \
         uebersichten.cpp \
@@ -148,11 +149,12 @@ HEADERS += pch.h\
         helpersql.h \
         ibanvalidator.h \
         investment.h \
+        letter.h \
         letterTemplate-old.h \
         letters-old.h \
-        letters.h \
         lettersnippets.h \
         mainwindow.h \
+        mainwindow_jea_briefe.h \
         pch.h \
         tabledatainserter.h \
         transaktionen.h \

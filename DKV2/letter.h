@@ -1,7 +1,8 @@
-#ifndef LETTERS_H
-#define LETTERS_H
+#ifndef LETTER_H
+#define LETTER_H
 
 #include "lettersnippets.h"
+#include "booking.h"
 
 
 enum class letterType {
@@ -12,19 +13,28 @@ enum class letterType {
     annInfoL          =int(interestModel::zero)     +1,
     maxValue
 };
-int fromLetterType( letterType lt);
-
+int intFromLetterType( letterType lt);
 letterType letterTypeFromInt(int lt);
 
-class letters
+struct letter
 {
-public:
-    letters();
+    letter(booking b);
+    QVector<QString> snippets;
+private:
+    bool loadSnippets();
+    bool initVars();
+    std::pair<QString, bool> applyVariables(QString text);
 
+    letterType lt;
+    const contract cont;
+    const creditor cred;
+    QMap<QString, QString> variables;
 };
+
+
 
 /// init for new db
 int writeDefaultSnippets(QSqlDatabase db =QSqlDatabase::database ());
 
 
-#endif // LETTERS_H
+#endif // LETTER_H

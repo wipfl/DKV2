@@ -52,7 +52,7 @@ bool checkSchema_ConvertIfneeded(const QString& origDbFile)
             qCritical() << "db converstion of older DB failed";
             return false;
         }
-        QMessageBox::information(nullptr, qsl("Erfolgsmeldung"), qsl("Die Konvertierung ware erfolgreich. Eine Kopie der ursprünglichen Datei liegt unter \n") +backup);
+        QMessageBox::information(nullptr, qsl("Erfolgsmeldung"), qsl("Die Konvertierung war erfolgreich. Eine Kopie der ursprünglichen Datei liegt unter \n") +backup);
         return true;
     } else if( version_of_original_file == CURRENT_DB_VERSION) {
         return validateDbSchema(origDbFile, dkdbstructur);

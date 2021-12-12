@@ -428,6 +428,9 @@
         <item>
          <layout class="QHBoxLayout" name="hlayout_topButtons">
           <item>
+           <widget class="QComboBox" name="cbYear"/>
+          </item>
+          <item>
            <widget class="QPushButton" name="btnUpdatePreview">
             <property name="text">
              <string>Ansicht aktualisieren</string>
@@ -473,20 +476,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="lblLetter">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                  <horstretch>10</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">background-color:powderblue;</string>
-                </property>
-                <property name="text">
-                 <string>DK Brief an DK Geber</string>
-                </property>
-               </widget>
+               <widget class="QComboBox" name="cbKennungen"/>
               </item>
               <item>
                <widget class="QPushButton" name="btnNextBooking">
@@ -556,6 +546,9 @@
                 <width>16777215</width>
                 <height>50</height>
                </size>
+              </property>
+              <property name="plainText">
+               <string>Anrede</string>
               </property>
              </widget>
             </item>
@@ -684,11 +677,18 @@
      <addaction name="action_menu_contracts_print_lists"/>
      <addaction name="actionAktuelle_Auswahl"/>
     </widget>
+    <widget class="QMenu" name="menu_Jahreszinsabrechnung">
+     <property name="title">
+      <string>&amp;Jahreszinsabrechnung</string>
+     </property>
+     <addaction name="action_Durchfuehren"/>
+     <addaction name="action_JEA_Briefe"/>
+    </widget>
     <addaction name="action_menu_contracts_listview"/>
     <addaction name="actionBeendete_Vertr_ge_anzeigen"/>
     <addaction name="action_Neu"/>
     <addaction name="separator"/>
-    <addaction name="action_menu_contracts_annual_interest_settlement"/>
+    <addaction name="menu_Jahreszinsabrechnung"/>
     <addaction name="separator"/>
     <addaction name="actionAnlagen_verwalten"/>
     <addaction name="action_menu_contracts_statistics_view"/>
@@ -741,10 +741,13 @@
   </action>
   <action name="action_menu_creditors_listview">
    <property name="text">
-    <string>&amp;Liste </string>
+    <string>&amp;Liste anzeigen</string>
    </property>
    <property name="toolTip">
     <string>Zeigt eine Liste aller DK Geber an</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
    </property>
   </action>
   <action name="action_menu_database_program_exit">
@@ -755,6 +758,9 @@
   <action name="action_menu_contracts_listview">
    <property name="text">
     <string>&amp;Liste anzeigen</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
   <action name="action_menu_debug_create_sample_data">
@@ -831,11 +837,6 @@
    </property>
    <property name="toolTip">
     <string>Adressdaten und Bankdaten bearbeiten</string>
-   </property>
-  </action>
-  <action name="action_menu_contracts_annual_interest_settlement">
-   <property name="text">
-    <string>&amp;Jahreszinsabrechnung...</string>
    </property>
   </action>
   <action name="action_menu_database_configure_outdir">
@@ -986,6 +987,19 @@
    </property>
    <property name="toolTip">
     <string>Zeigt alle Verträge, die zu dieser Anlage abgeschlossen wurden</string>
+   </property>
+  </action>
+  <action name="action_Durchfuehren">
+   <property name="text">
+    <string>&amp;Durchführen</string>
+   </property>
+  </action>
+  <action name="action_JEA_Briefe">
+   <property name="text">
+    <string>&amp;Briefe</string>
+   </property>
+   <property name="toolTip">
+    <string>Briefdruck zur Jahresendabrechnung</string>
    </property>
   </action>
  </widget>

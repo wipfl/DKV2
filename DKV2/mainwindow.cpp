@@ -345,6 +345,7 @@ void MainWindow::prepare_startPage()
     qDebug() <<"welcome Screen html: " << Qt::endl << messageHtml << Qt::endl;
     ui->lblInfo->setText(messageHtml);
 }
+
 void MainWindow::on_action_menu_database_start_triggered()
 {   LOG_CALL;
     prepare_startPage();
@@ -454,6 +455,17 @@ void MainWindow::on_action_menu_database_program_exit_triggered()
     ui->stackedWidget->setCurrentIndex(startPageIndex);
     this->close();
 }
+
+/////////////////////////////////////////////////
+// annual settlement
+/////////////////////////////////////////////////
+void MainWindow::on_action_Durchfuehren_triggered()
+{LOG_CALL;
+    annualSettlement();
+    updateViews();
+}
+
+/* Briefdruck -> mainwindow_jea_briefe.cpp */
 
 /////////////////////////////////////////////////
 // List of investments
@@ -644,6 +656,7 @@ void MainWindow::on_actionTyp_Bezeichnung_aendern_triggered()
     if( executeSql_wNoRecords(sql, {QVariant(txt)}))
         tm->select();
 }
+
 void MainWindow::on_action_cmenu_Vertraege_anzeigen_triggered()
 {
     QModelIndex index =ui->actionInvestmentLoeschen->data().toModelIndex();
@@ -869,15 +882,6 @@ void MainWindow::on_actionStatistik_triggered()
 }
 
 /////////////////////////////////////////////////
-// annual settlement
-/////////////////////////////////////////////////
-void MainWindow::on_action_menu_contracts_annual_interest_settlement_triggered()
-{   LOG_CALL;
-    annualSettlement();
-    updateViews();
-}
-
-/////////////////////////////////////////////////
 // list creation csv, printouts
 /////////////////////////////////////////////////
 void MainWindow::on_action_menu_contracts_print_lists_triggered()
@@ -943,82 +947,6 @@ void MainWindow::on_action_about_DKV2_triggered()
 void MainWindow::on_actionTEST_triggered()
 {
     LOG_CALL;
-//    // input nec. to display the dialog: a Vector of bookings
-//    toBePrinted.clear();
-//    toBePrinted = bookings::getAnnualSettelments(2019);
-//    if ( not toBePrinted.size()) {
-//        qWarning() << "nothing to be printed";
-//        return;
-//    }
-//    currentBooking = toBePrinted.begin();
-
-//    prepare_printPreview();
-//    ui->stackedWidget->setCurrentIndex(printPreviewPageIndex);
-}
-/////////////////////////////////////////////////
-//              PRINTING wprev.                //
-/////////////////////////////////////////////////
-QString letterName(const booking &b)
-{
-    QString txt = qsl("<table width=100%><tr><td align=center style='padding-top:5px;padding-bottom:5px;'>%1, %2; %3<br><b>%4</b></td></tr></table>");
-    contract cont(b.contractId);
-    creditor cred(cont.creditorId());
-    QString lettertype = booking::displayString(b.type) +qsl(" ");
-    lettertype += (b.type == booking::Type::annualInterestDeposit) ? QString::number(b.date.year() - 1) : b.date.toString();
-
-    txt = txt.arg(cred.lastname(), cred.firstname(), cont.label(), lettertype);
-    return txt;
-}
-
-void MainWindow::prepare_printPreview()
-{
-    LOG_CALL;
-    ui->btnPrevBooking->setEnabled(currentBooking not_eq toBePrinted.cbegin());
-    ui->btnNextBooking->setEnabled((currentBooking +1) not_eq toBePrinted.cend());
-
-    ui->lblLetter->setText (letterName(*currentBooking));
-
-    QFont f(qsl("Verdana"));
-    ui->fontComboBox->setCurrentFont(f);
-    ui->spinFontSize->setValue(10);
-}
-
-void MainWindow::on_btnNextBooking_clicked()
-{
-    LOG_CALL;
-    if ((currentBooking+1) == toBePrinted.cend())
-        return;
-    else
-        currentBooking = currentBooking +1;
-    prepare_printPreview();
-}
-
-void MainWindow::on_btnPrevBooking_clicked()
-{
-    LOG_CALL;
-    if (currentBooking == toBePrinted.cbegin())
-        return;
-    else
-        currentBooking = currentBooking -1;
-    prepare_printPreview();
-}
-
-void MainWindow::on_btnUpdatePreview_clicked()
-{
-    ui->wPreview->updatePreview();
-}
-
-void MainWindow::doPaint(QPrinter* pri)
-{
-    QPainter p(dynamic_cast<QPaintDevice*>(pri));
-    p.drawText(QPoint(100, 100), qsl("Hallo World"));
-
-    // Logo
-    // Adresse
-    // Datum
-    // Anrede
-    // Fußzeile
-    // text(e)
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -1042,3 +970,4 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.setValue(qsl("windowState"), saveState());
     event->accept();
 }
+

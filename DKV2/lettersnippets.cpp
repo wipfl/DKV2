@@ -32,28 +32,28 @@
     return v;
 }
 
-letterSnippet letterSnippetFromInt(int i) {
-    Q_ASSERT(i<=int(letterSnippet::maxValue));
-    return static_cast<letterSnippet>(i);
-}
-snippetType snippetTypeFromInt( int i) {
+snippetType snippetTypeFromInt(int i) {
     Q_ASSERT(i<=int(snippetType::maxValue));
     return static_cast<snippetType>(i);
 }
+snippetKind snippetKindFromInt( int i) {
+    Q_ASSERT(i<=int(snippetKind::maxValue));
+    return static_cast<snippetKind>(i);
+}
 
-snippet::snippet(letterSnippet ls, letterType lT /*=allLetters */, qlonglong creditor /*=0*/)
+snippet::snippet(snippetType ls, letterType lT /*=allLetters */, qlonglong creditor /*=0*/)
     : ls(ls), lType (lT), cId(creditor)
 {
     // ensure consistency
     switch(type()){
-    case snippetType::allLettersAllKreditors:
+    case snippetKind::allLettersAllKreditors:
         if( lType not_eq (letterType)allLetters || cId not_eq 0) {
             qDebug() << "resetting snippet attributes" << snippetNames[int(ls)];
             lType = (letterType)allLetters;
             cId = 0;
         }
         break;
-    case snippetType::allKreditors:
+    case snippetKind::allKreditors:
         if( cId not_eq 0) {
             qDebug() << "resetting snippet attributes" << snippetNames[int(ls)];
             cId = 0;
@@ -61,18 +61,18 @@ snippet::snippet(letterSnippet ls, letterType lT /*=allLetters */, qlonglong cre
         if(lT == (letterType)allLetters) // there is no generic "Betreff" for all letters ...
             qCritical() << "wrong letter type for this snippetType" << snippetNames[int(ls)];
         break;
-    case snippetType::allLetters:
+    case snippetKind::allLetters:
         if( lType not_eq (letterType)allLetters) {
             qDebug() << "resetting snippet attributes" << snippetNames[int(ls)];
             lType = (letterType)allLetters;
         }
-    case snippetType::individual:
-    case snippetType::maxValue:
+    case snippetKind::individual:
+    case snippetKind::maxValue:
         break;
     }
 }
 
-std::pair<QString, bool> snippet::read(const letterSnippet sId, const letterType lId, const qlonglong kId, QSqlDatabase db/*=QSqlDatabase::database ()*/)
+std::pair<QString, bool> snippet::read(const snippetType sId, const letterType lId, const qlonglong kId, QSqlDatabase db/*=QSqlDatabase::database ()*/)
 {
     // generic read function for the db stuff
     QString where {qsl("%1=%4 AND %2=%5 AND %3%6").arg(fnSnippet, fnLetter, fnCreditor)};
@@ -86,7 +86,7 @@ std::pair<QString, bool> snippet::read(const letterSnippet sId, const letterType
     return std::make_pair(result.toString (), success);
 }
 
-bool snippet::write (const QString text, const letterSnippet sId, const letterType lId, const qlonglong kId, QSqlDatabase db/*=QSqlDatabase::database ()*/)
+bool snippet::write (const QString text, const snippetType sId, const letterType lId, const qlonglong kId, QSqlDatabase db/*=QSqlDatabase::database ()*/)
 {
     // generic write function for the db stuff
     QString sql {qsl("REPLACE INTO %1 VALUES (?, ?, ?, ?) ").arg(tableName)};
@@ -108,20 +108,20 @@ std::pair<QString, bool> snippet::read(QSqlDatabase db) const
     QString text;
     bool result =false;
     switch( type()) {
-    case snippetType::allLettersAllKreditors:
+    case snippetKind::allLettersAllKreditors:
         // date, greeting, food
         return read(ls, (letterType)allLetters, cId_allKreditors, db);
-    case snippetType::allKreditors:
+    case snippetKind::allKreditors:
         // table, about: different for each letter, same for each creditor
         return read(ls, lType, cId_allKreditors, db);
-    case snippetType::allLetters:
+    case snippetKind::allLetters:
         // address, salut: different for each kreditor, fallback o cId =0  possible
         std::tie(text, result) =read(ls, (letterType)allLetters, cId, db);
         if( result)
             return {text, result};
         else
             return read(ls, (letterType)allLetters, cId_allKreditors, db);
-    case snippetType::individual:
+    case snippetKind::individual:
         // text1, text2: different for each letter and kreditor
         std::tie(text, result) =read(ls, lType, cId, db);
         if( result)
@@ -137,16 +137,16 @@ std::pair<QString, bool> snippet::read(QSqlDatabase db) const
 bool snippet::write(const QString& text, QSqlDatabase db) const
 {
     switch( type()) {
-    case snippetType::allLettersAllKreditors:
+    case snippetKind::allLettersAllKreditors:
         // date, greeting, food
         return write(text, ls, (letterType)allLetters, cId_allKreditors, db);
-    case snippetType::allKreditors:
+    case snippetKind::allKreditors:
         // table, about: different for each letter
         return write(text, ls, lType, cId_allKreditors, db);
-    case snippetType::allLetters:
+    case snippetKind::allLetters:
         // address, salut: different for each kreditor
         return write(text, ls, (letterType)allLetters, cId, db);
-    case snippetType::individual:
+    case snippetKind::individual:
         // text1, text2: different for each letter and kreditor
         return write(text, ls, lType, cId, db);
     default:

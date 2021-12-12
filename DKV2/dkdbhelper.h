@@ -61,6 +61,10 @@ void getInactiveContractBookingDates( QVector<BookingDateData>& dates);
 void getFinishedContractBookingDates( QVector<BookingDateData>& dates);
 void getAllContractBookingDates( QVector<BookingDateData>& dates);
 
+// for Briefdruck
+QVector<int> abrechnungsJahre();
+QVector<QPair<qlonglong, QString>> kennungenVonAbrechnungsjahr(int year);
+
 // calculations for Uebersichten
 double valueOfAllContracts();
 QVector<QStringList> overviewShortInfo(const QString& sql);
