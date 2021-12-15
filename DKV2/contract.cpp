@@ -89,7 +89,8 @@ void contract::initContractDefaults(const qlonglong CREDITORid /*=-1*/)
     setInterestActive(true);
 }
 void contract::loadFromDb(qlonglong id)
-{   LOG_CALL_W(QString::number(id));
+{
+    qDebug() << "Loading Creditor from DB using id " << id;
     QSqlRecord rec = executeSingleRecordSql(getTableDef().Fields(), "id=" + QString::number(id));
     if( not td.setValues(rec))
         qCritical() << "contract from id could not be created";
@@ -598,7 +599,7 @@ QString contract::toString(const QString &title) const
     }
     stream << "Wert:     " << value() << Qt::endl;
     stream << "Zinssatz: " << interestRate() << Qt::endl;
-    stream << "Buchungen:" << bookings::getBookings(id()).count() << Qt::endl;
+    stream << "Buchungen:" << bookings::count(id()) << Qt::endl;
     stream << "Letzte B. " << booking::typeName(latestB.type) << qsl(", ")
            << latestB.amount << qsl(", ") << latestB.date.toString() << Qt::endl;
     return ret;

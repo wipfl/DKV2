@@ -481,7 +481,7 @@ QVector<int> abrechnungsJahre()
     return years;
 }
 
-QVector<QPair<qlonglong, QString>> kennungenVonAbrechnungsjahr(int year)
+QVector<QPair<qlonglong, QString>> bookingIdContractlabel_fromYear(int year)
 {   LOG_CALL_W(QString::number(year));
     QVector<QSqlRecord> sqlr;
     QString sql {qsl("SELECT Buchungen.id, Vertraege.Kennung "

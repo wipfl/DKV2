@@ -79,8 +79,8 @@ bool creditor::operator==(const creditor& c) const
 }
 
 bool creditor::fromDb( const int id)
-{   LOG_CALL;
-
+{
+    qDebug() << "Loading creditor from DB using id " << id;
     QSqlRecord rec = executeSingleRecordSql(dkdbstructur[qsl("Kreditoren")].Fields(), qsl("id=")+QString::number(id));
     if( rec.isEmpty()) return false;
 

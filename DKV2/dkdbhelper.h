@@ -63,7 +63,7 @@ void getAllContractBookingDates( QVector<BookingDateData>& dates);
 
 // for Briefdruck
 QVector<int> abrechnungsJahre();
-QVector<QPair<qlonglong, QString>> kennungenVonAbrechnungsjahr(int year);
+QVector<QPair<qlonglong, QString>> bookingIdContractlabel_fromYear(int year);
 
 // calculations for Uebersichten
 double valueOfAllContracts();

@@ -2,7 +2,7 @@
 #include "creditor.h"
 #include "lettersnippets.h"
 
-/*static*/ const QString snippet::tableName  {qsl("BriefElemente")};
+/*static*/ const QString snippet::tableName  {qsl("BriefBestandteile")};
 /*static*/ const QString snippet::fnSnippet  {qsl("Element")};
 /*static*/ const QString snippet::fnLetter   {qsl("Brief")};
 /*static*/ const QString snippet::fnCreditor {qsl("Kid")};

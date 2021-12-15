@@ -17,8 +17,26 @@ letterType letterTypeFromInt(int lt)
 }
 
 letter::letter(booking b)
-    : cont(contract(b.contractId)), cred(creditor(cont.creditorId ()))
+    : cont(contract(b.contractId))
+    , cred(creditor(cont.creditorId ()))
 {
+    qDebug() << "letter from Contract " << cont.id()
+             << " creditor " << cred.id ();
+    if( b.type == booking::Type::annualInterestDeposit) {
+        switch(cont.iModel ())
+        {
+        case interestModel::payout:
+        case interestModel::reinvest:
+        case interestModel::fixed:
+        case interestModel::zero:
+            lt =letterTypeFromInt ((int)cont.iModel () +1);
+            break;
+        case interestModel::maxId:
+        default:
+//        case interestModel::allIModels:
+            qCritical() << "can not build invalid letter type";
+        }
+    }
     loadSnippets ();
 }
 
@@ -28,14 +46,18 @@ std::pair<QString, bool> letter::applyVariables(QString )
 }
 
 bool letter::loadSnippets()
-{
-    for(snippetType type =(snippetType)0; type < snippetType::maxValue; type =snippetTypeFromInt(int(type) +1)){
+{   LOG_CALL;
+    for(snippetType type =snippetTypeFromInt(0); type < snippetType::maxValue; type =snippetTypeFromInt(int(type) +1)) {
+        qDebug() << "Type: " << snippetNames[(int)type] << ", LetterType: "
+                << intFromLetterType(lt) << ", CredId:" << cred.id();
         snippet snip (type, lt, cred.id ());
         QString text;
         bool suc;
         std::tie(text, suc) =snip.read();
         if(suc)
             snippets.push_back (text);
+        else
+            qCritical() << "loading snippet failed";
     }
     return true;
 }
@@ -93,14 +115,14 @@ bool letter::initVars()
 int writeDefaultSnippets(QSqlDatabase db)
 {
     QVector<QPair<snippet, QString>> defaultSnippets = {
-         { snippet(snippetType::date), qsl("{{gmbh.adresse1}} den {{datum}}")}
-        ,{ snippet(snippetType::greeting), qsl("Mit freundlichen Grüßen")}
-        ,{ snippet(snippetType::foot), qsl("<table width=100%><tr><td width=33%><small>Geschäftsführer*innen:<br>{{gmbh.gefue1}}<br>{{gmbh.gefue2}}<br>{{gmbh.gefue3}}</small></td><td width=33%></td><td width=33%></td></tr></table>")}
+         { snippet(snippetType::address, letterType::all), qsl("<small>{{gmbh.address1}} {{gmbh.address2}}<br>{{gmbh.strasse}}, <b>{{gmbh.plz}}</b> {{gmbh.stadt}}</small><p>"
+           "{{kreditoren.vorname}} {{kreditoren.nachname}} <p> {{kreditoren.strasse}} <br><b> {{kreditoren.plz}} </b> {{kreditoren.stadt}} <br><small> {{kreditoren.email}} </small>")}
+        ,{ snippet(snippetType::date), qsl("{{gmbh.adresse1}} den {{datum}}")}
         ,{ snippet(snippetType::about, letterType::annPayoutL), qsl("Jahreszinsinformation {{Jahr}}")}
         ,{ snippet(snippetType::about, letterType::annReinvestL), qsl("Jahreszinsinformation {{Jahr}}")}
         ,{ snippet(snippetType::about, letterType::annInterestInfoL), qsl("Jahreszinsinformation {{Jahr}}")}
         ,{ snippet(snippetType::about, letterType::annInfoL), qsl("Jährliche Kreditinformation {{Jahr}}")}
-
+        ,{ snippet(snippetType::greeting), qsl("Liebe/r {{Vorname}}")}
         ,{ snippet(snippetType::text1, letterType::annPayoutL), qsl("die Mitglieder des Wohnprojektes Esperanza wünschen ein schönes neues Jahr und bedanken sich herzlich für Deine Unterstützung.<p>"
            "Dies ist der Kontoauszug Deiner Direktkredite für das Jahr 2019 bei {{gmbh.adresse1}}. "
            "Vereinbarungsgemäß werden die Zinsen Deines Direktkredits in den nächsten Tagen ausgezahlt. Auf Wunsch erstellen wir eine gesonderte Zinsbescheinigung für die Steuererklärung.")}
@@ -110,7 +132,10 @@ int writeDefaultSnippets(QSqlDatabase db)
         ,{ snippet(snippetType::text1, letterType::annInterestInfoL), qsl("die Mitglieder des Wohnprojektes Esperanza wünschen ein schönes neues Jahr und bedanken sich herzlich für Deine Unterstützung.<p>"
            "Vereinbarungsgemäß werden die Zinsen für Deinen Direktkredit bis zur Auszahlung des Kredits bei uns verwahrt.")}
         ,{ snippet(snippetType::text1, letterType::annInfoL), qsl("die Mitglieder des Wohnprojektes Esperanza wünschen ein schönes neues Jahr und bedanken sich herzlich für Deine Unterstützung.<p>")}
-
+        ,{ snippet(snippetType::table, letterType::annPayoutL), qsl("<table></table>")}
+        ,{ snippet(snippetType::table, letterType::annReinvestL), qsl("<table></table>")}
+        ,{ snippet(snippetType::table, letterType::annInterestInfoL), qsl("<table></table>")}
+        ,{ snippet(snippetType::table, letterType::annInfoL), qsl("<table></table>")}
         ,{ snippet(snippetType::text2, letterType::annPayoutL), qsl("Soltest Du noch Fragen zu dieser Abrechnung haben, so zögere bitte nicht, Dich bei uns per Post oder E-Mail zu melden.<p>"
            "Wir hoffen auch in diesem Jahr auf Deine Solidarität. Für weitere Umschuldungen benötigen wir auch weiterhin Direktkredite. "
            "Empfehle uns Deinen Freund*innen und Verwandten.")}
@@ -123,15 +148,16 @@ int writeDefaultSnippets(QSqlDatabase db)
         ,{ snippet(snippetType::text2, letterType::annInfoL), qsl("Soltest Du noch Fragen zu Deinem Kredit haben, so zögere bitte nicht, Dich bei uns per Post oder E-Mail zu melden.<p>"
            "Wir hoffen auch in diesem Jahr auf Deine Solidarität. Für weitere Umschuldungen benötigen wir auch weiterhin Direktkredite. "
            "Empfehle uns Deinen Freund*innen und Verwandten.")}
-
-        ,{ snippet(snippetType::address, letterType::all), qsl("<small>{{gmbh.address1}} {{gmbh.address2}}<br>{{gmbh.strasse}}, <b>{{gmbh.plz}}</b> {{gmbh.stadt}}</small><p>"
-           "{{kreditoren.vorname}} {{kreditoren.nachname}} <p> {{kreditoren.strasse}} <br><b> {{kreditoren.plz}} </b> {{kreditoren.stadt}} <br><small> {{kreditoren.email}} </small>")}
         ,{ snippet(snippetType::salut, letterType::all), qsl("Mit freundlichen Grüßen")}
+        ,{ snippet(snippetType::foot), qsl("<table width=100%><tr><td width=33%><small>Geschäftsführer*innen:<br>{{gmbh.gefue1}}<br>{{gmbh.gefue2}}<br>{{gmbh.gefue3}}</small></td><td width=33%></td><td width=33%></td></tr></table>")}
     };
     int ret =0;
     for (const auto& pair: qAsConst(defaultSnippets)) {
         if( pair.first.wInitDb(pair.second, db))
-            ret++;;
+        {
+            qDebug() << "successfully written snippet " << pair.first.name () << " : " << pair.second;
+            ret++;
+        }
     }
     return ret;
 }

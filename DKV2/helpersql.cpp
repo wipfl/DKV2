@@ -422,7 +422,7 @@ bool executeSql_wNoRecords(const QString& sql, const QVector<QVariant>& v, const
         }
     }
     if( q.exec()) {
-        qInfo() << "Successfully executed query " << q.lastQuery() << " with "
+        qInfo().noquote () << "Successfully executed query " << q.lastQuery() << " with "
         << (q.numRowsAffected() ? QString::number(q.numRowsAffected()) : qsl("no")) << qsl(" affected Rows");
         return true;
     }

@@ -7,6 +7,15 @@
 
 letter* Letter =nullptr;
 
+void writeDefaultSnippetsIfNeeded()
+{
+    QString tableName {snippet::getTableDef ().Name ()};
+    ensureTable(tableName);
+    if( rowCount(tableName) <1) {
+        writeDefaultSnippets ();
+    }
+}
+
 void MainWindow::on_action_JEA_Briefe_triggered()
 {   LOG_CALL;
     busycursor b;
@@ -15,6 +24,10 @@ void MainWindow::on_action_JEA_Briefe_triggered()
         QMessageBox::information (this, qsl("keine Daten"), qsl("Es wurden keine Jahresabrechnungen gefunden"));
         return;
     }
+    static bool need_check =true;
+    if( need_check)
+        writeDefaultSnippetsIfNeeded();
+    need_check =false;
     prepare_jea_briefe_page (years);
     ui->stackedWidget->setCurrentIndex (printPreviewPageIndex);
 }
@@ -32,7 +45,7 @@ void MainWindow::prepare_jea_briefe_page(const QVector<int>& years)
 void MainWindow::on_cbYear_currentIndexChanged(int year)
 {   LOG_CALL;
     ui->cbKennungen->clear();
-    QVector<QPair<qlonglong, QString>> kennungen =kennungenVonAbrechnungsjahr(ui->cbYear->itemData (year).toInt ());
+    QVector<QPair<qlonglong, QString>> kennungen =bookingIdContractlabel_fromYear(ui->cbYear->itemData (year).toInt ());
     for(const auto & kennung : qAsConst(kennungen)) {
         ui->cbKennungen->addItem (kennung.second, kennung.first);
     }
@@ -57,7 +70,10 @@ void MainWindow::on_cbKennungen_currentIndexChanged(int index)
     else
         ui->btnNextBooking->setEnabled (true);
 
-    prepare_printPreview(ui->cbKennungen->itemData (index ).toLongLong ());
+    qlonglong bookingId =ui->cbKennungen->itemData (index ).toLongLong ();
+    qDebug() << "Brief für Vertrag m Kennung " << ui->cbKennungen->itemText (index)
+             << " mit Buchungs Id " <<  bookingId;
+    prepare_printPreview(bookingId);
 }
 
 void MainWindow::on_btnNextBooking_clicked()
@@ -81,6 +97,9 @@ void MainWindow::prepare_printPreview(qlonglong bookingId)
         delete Letter;
     Letter =new letter(booking(bookingId));
     ui->txtAnrede->setPlainText (Letter->snippets[(int)snippetType::greeting]);
+    ui->txtGruss->setPlainText (Letter->snippets[(int)snippetType::salut]);
+    ui->txtText1->setPlainText (Letter->snippets[(int)snippetType::text1]);
+    ui->txtText2->setPlainText (Letter->snippets[(int)snippetType::text2]);
 }
 
 

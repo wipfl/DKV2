@@ -19,13 +19,36 @@ struct booking
     inline static int bookingTypeToInt(const booking::Type t) {
         return static_cast<int>(t);
     }
+    inline static Type bookingTypeFromInt(int b) {
+        switch(b)
+        {
+        case (int)(Type::non):
+            return Type::non;
+        case (int)(Type::deposit):
+            return Type::deposit;
+        case (int)(Type::payout):
+            return Type::payout;
+        case (int)(Type::reInvestInterest):
+            return Type::reInvestInterest;
+        case (int)(Type::annualInterestDeposit):
+            return Type::annualInterestDeposit;
+        case (int)(Type::setInterestActive):
+            return Type::setInterestActive;
+        default:
+            Q_ASSERT(not "wrong booking type");
+            return Type::non;
+        }
+    }
 
     qlonglong contractId =-1;
     Type type =Type::non;
     QDate date =EndOfTheFuckingWorld;
     double amount =0.;
     // construction
-    booking(const qlonglong cId, const booking::Type t = Type::non, const QDate d =EndOfTheFuckingWorld, const double a =0.)
+
+    booking(qlonglong bid);
+    booking(){};
+    booking(const qlonglong cId, const booking::Type t /*= Type::non*/, const QDate d /*=EndOfTheFuckingWorld*/, const double a /*=0.*/)
         : contractId(cId), type(t), date(d), amount(a) {};
     // comparison for tests
     inline friend bool operator==(const booking& lhs, const booking& rhs)
@@ -59,9 +82,8 @@ Q_DECLARE_TYPEINFO(booking, Q_PRIMITIVE_TYPE );
 struct bookings
 {
     static QDate dateOfnextSettlement();
-    static QVector<booking> bookingsFromSql(const QString& where, const QString& order=QString());
-    static QVector<booking> getBookings(const qlonglong cid, const QDate from =BeginingOfTime, const QDate to =EndOfTheFuckingWorld);
-    static QVector<booking> getAnnualSettelments(const int year);
+//    static QVector<booking> bookingsFromSql(const QString& where, const QString& order=QString());
+    static int count(const qlonglong cid);
 };
 
 #endif // BOOKING_H

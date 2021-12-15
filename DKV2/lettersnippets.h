@@ -16,15 +16,15 @@ enum class snippetKind {
 snippetKind snippetKindFromInt( int i);
 
 #define SNIPPETS \
-    X(date,     "date",     snippetKind::allLettersAllKreditors) \
-    X(greeting, "greeting", snippetKind::allLettersAllKreditors)  \
-    X(foot,     "foot",     snippetKind::allLettersAllKreditors)   \
-    X(table,    "table",    snippetKind::allKreditors) \
-    X(about,    "about",    snippetKind::allKreditors)            \
-    X(text1,    "text1",    snippetKind::individual)               \
-    X(text2,    "text2",    snippetKind::individual)             \
     X(address,  "address",  snippetKind::allLetters)              \
+    X(date,     "date",     snippetKind::allLettersAllKreditors) \
+    X(about,    "about",    snippetKind::allKreditors)            \
+    X(greeting, "greeting", snippetKind::allLettersAllKreditors)  \
+    X(text1,    "text1",    snippetKind::individual)               \
+    X(table,    "table",    snippetKind::allKreditors) \
+    X(text2,    "text2",    snippetKind::individual)             \
     X(salut,    "salut",    snippetKind::allLetters)               \
+    X(foot,     "foot",     snippetKind::allLettersAllKreditors)   \
     X(maxValue, "n/a",      snippetKind::allLettersAllKreditors) \
 
 #define X(a, b, c) a,

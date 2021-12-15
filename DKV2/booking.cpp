@@ -106,34 +106,21 @@
     qInfo() << "Date of next Settlement was found as " << ret;
     return ret;
 }
-/*static */ QVector<booking> bookings::bookingsFromSql(const QString& where, const QString& order)
+
+/* static */ int bookings::count(qlonglong cid)
+{   LOG_CALL;
+    return executeSingleValueSql (qsl("SELECT COUNT(*) FROM Buchungen WHERE VertragsId = %1 ").arg(cid)).toInt ();
+}
+
+booking::booking(qlonglong bid)
 {
-    QVector<QSqlRecord> records = executeSql(booking::getTableDef().Fields(), where, order);
-    QVector<booking> vRet;
-    for (auto& rec : qAsConst(records)) {
-        qlonglong cid = rec.value(qsl("VertragsId")).toLongLong();
-        booking::Type t = booking::Type(rec.value(qsl("BuchungsArt")).toInt());
-        QDate d = rec.value(qsl("Datum")).toDate();
-        double amount = euroFromCt(rec.value(qsl("Betrag")).toInt());
-        qInfo() << "Buchung: cid=" << cid << "; type=" << booking::displayString(t) << "; Datum=" << d.toString() << "; Betrag=" << amount;
-        vRet.push_back(booking(cid, t, d, amount));
+    QSqlRecord rec =executeSingleRecordSql (booking::getTableDef ().Fields (), qsl("id = %1").arg(QString::number(bid)));
+    if( rec.isEmpty ()){
+        qDebug() << "no matching booking";
+        return;
     }
-    return vRet;
-}
-
-/* static */ QVector<booking> bookings::getBookings(const qlonglong cid, QDate from, const QDate to)
-{   LOG_CALL;
-    // used in tests
-    QString where = qsl("Buchungen.VertragsId=%1 "
-                  "AND Buchungen.Datum >='%2' "
-                  "AND Buchungen.Datum <='%3'");
-    where = where.arg(QString::number(cid), from.toString(Qt::ISODate), to.toString(Qt::ISODate));
-
-    return bookingsFromSql(where, qsl("Datum DESC"));
-}
-/* static */ QVector<booking> bookings::getAnnualSettelments(const int year)
-{   LOG_CALL;
-    QString where = qsl("Buchungen.BuchungsArt = %1 AND Buchungen.Datum = '%2'");
-    where = where.arg(QString::number(static_cast<int>(booking::Type::annualInterestDeposit)), QDate(year + 1, 1, 1).toString(Qt::ISODate));
-    return bookingsFromSql(where);
+    contractId =rec.value (qsl("VertragsId")).toLongLong ();
+    type =bookingTypeFromInt(rec.value(qsl("BuchungsArt")).toInt ());
+    date =rec.value (qsl("Datum")).toDate ();
+    amount =rec.value(qsl("Betrag")).toDouble();
 }
