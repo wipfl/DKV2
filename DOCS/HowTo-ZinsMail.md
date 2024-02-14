@@ -1,4 +1,14 @@
 # Zinsbriefe per eMail versenden
+
+## Vorbemerkung zum Versenden der eMails mit Thunderbird
+
+In diesem Dokument sind die Möglichkeiten beschrieben, unter Windows oder Linux die Zinsbriefe automatisiert per eMail zu versenden. Dazu wird auf das Programmpaket mail-utils (Linux) bzw. SwithMail (Windows) zurückgegriffen. 
+Die Einrichtung dieser Programmpakete und die anschließende Nutzung hat sich bei den Nutzer*innen teilweise als zu komplex herausgestellt. 
+Es gibt darüber hinaus die Möglichkeit, das beliebte eMail-Programm Thunderbird zum Versenden der Mails zu benutzen. Dabei sind keine Befehle in der Kommandozeile des Betriebssystems erforderlich - alles spielt sich in der Benutzeroberfläche von DKV2 und Tunderbird ab. Es ist also zu hoffen, dass du mit dieser Möglichkeit besser zurecht kommst.
+
+Die Vorgehensweise ist im Dokument 
+## Grundlage
+
 Seit der Pre-Release-Version 0.20.0.4 werden beim Erstellen der jährlichen Zinsmitteilungen noch zwei weitere Dokumente erstellt:
 
 - eine Datei Zinsliste-XXXX.pdf (XXXX ist das Jahr der Abrechnung), in der sich eine Übersicht aller Kreditoren mit aktiven oder im Abrechnungsjahr beendeten Direktkrediten und eine Übersicht über alle anstehenden Überweisungen für die auszuzahlenden Jahreszinsen befindet.
