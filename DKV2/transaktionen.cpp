@@ -362,6 +362,15 @@ void changeContractValue(contract *pc) {
         qInfo() << "contract change was canceld by the user";
 }
 
+void changeInterestRate(contract *pc) {
+    LOG_CALL;
+    if (not pc->initialPaymentReceived()) {
+        qCritical() << "tried to changeContractValue of an inactive contract";
+        Q_ASSERT(false);
+        return;
+    }
+}
+
 void undoLastBooking(contract* v)
 {
     QString sqlMsg {qsl(R"str(

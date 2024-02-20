@@ -385,6 +385,7 @@ void MainWindow::on_contractsTableView_customContextMenuRequested(QPoint pos)
             menu.addAction(ui->action_cmenu_terminate_contract);
             menu.addAction (ui->action_cmenu_undo_last_booking);
             menu.addAction(ui->action_cmenu_change_contract);
+            menu.addAction (ui->action_cmenu_change_interestRate);
             // interest activation only after init.payment (not enforced by contract::)
             if( not c.interestActive())
                 menu.addAction(ui->action_cmenu_activate_interest_payment);
@@ -444,6 +445,12 @@ void MainWindow::on_action_cmenu_change_contract_triggered()
     changeContractValue(contractUnderMouseMenu);
     updateViews();
 }
+void MainWindow::on_action_cmenu_change_interestRate_triggered()
+{   LOG_CALL;
+    changeInterestRate(contractUnderMouseMenu);
+    updateViews();
+}
+
 void MainWindow::on_action_cmenu_undo_last_booking_triggered()
 {   LOG_CALL;
     undoLastBooking(contractUnderMouseMenu);

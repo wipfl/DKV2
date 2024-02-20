@@ -123,6 +123,7 @@ SOURCES += \
         wizactivatecontract.cpp \
         wizcancelcontract.cpp \
         wizchangecontractvalue.cpp \
+        wizchangeinterestrate.cpp \
         wiznew.cpp \
         wiznewdatabase.cpp \
         wiznewinvestment.cpp \
@@ -175,6 +176,7 @@ HEADERS += pch.h\
         wizactivatecontract.h \
         wizcancelcontract.h \
         wizchangecontractvalue.h \
+        wizchangeinterestrate.h \
         wiznew.h \
         wiznewdatabase.h \
         wiznewinvestment.h \
