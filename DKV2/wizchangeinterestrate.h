@@ -4,11 +4,9 @@
 #include "helper.h"
 
 
-const QString fnDeposit_notPayment {qsl("deposit_notPayment")};
-
-struct wpChangeInterestRate_AmountPage : public QWizardPage
+struct wpChangeInterestRate_ValuePage : public QWizardPage
 {
-    wpChangeInterestRate_AmountPage(QWidget* parent =nullptr);
+    wpChangeInterestRate_ValuePage(QWidget* parent =nullptr);
     void cleanupPage() override  {};
     void initializePage() override;
     bool validatePage() override;
@@ -50,9 +48,10 @@ struct wizChangeInterestRate : public QWizard
     wizChangeInterestRate(QWidget* p =nullptr);
     QString creditorName;
     QString contractLabel;
-    double  currentAmount = 0.;
-    QDate   earlierstDate;
-    bool interestPayoutPossible =false;
+    double  currentValue = 0.;
+    double newValue = 0.;
+    double maxValue = 0.;
+    QDate earlierstDate;
     Q_OBJECT;
 };
 

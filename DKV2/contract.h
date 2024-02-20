@@ -137,6 +137,7 @@ struct contract
     // interestBearingValue depends on interestMode
     double interestBearingValue() const;
     const booking latestBooking();
+    const booking latestInterestBooking();
 
     // write to db
     tableindex_t saveNewContract();

@@ -18,6 +18,7 @@
 #include "wizactivatecontract.h"
 #include "wizcancelcontract.h"
 #include "wizchangecontractvalue.h"
+#include "wizchangeinterestrate.h"
 #include "wizterminatecontract.h"
 // #include "wizannualsettlement.h"
 #include "busycursor.h"
@@ -369,6 +370,22 @@ void changeInterestRate(contract *pc) {
         Q_ASSERT(false);
         return;
     }
+
+    creditor cre(pc->creditorId());
+    wizChangeInterestRate wiz(getMainWindow());
+    wiz.creditorName = cre.firstname() + qsl(" ") + cre.lastname();
+    wiz.contractLabel = pc->label();
+    wiz.currentValue = pc->interestRate();
+    wiz.earlierstDate = pc->latestInterestBooking().date;
+    wiz.exec();
+    if (wiz.field(qsl("confirmed")).toBool()) {
+        double interestRate{QLocale().toDouble(wiz.field(qsl("newValue")).toString())};
+        QDate date{wiz.field(qsl("date")).toDate()};
+        /* TODO: Book new value */
+        qInfo() << qsl("New interest rate: %1").arg(interestRate);
+    } else
+        qInfo() << "contract change was canceld by the user";
+
 }
 
 void undoLastBooking(contract* v)

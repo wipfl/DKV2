@@ -5,11 +5,9 @@
 
 #include "wizchangeinterestrate.h"
 
-enum change_interestrate_pages {
-    intro_page,
-    amount_page,
+enum change_value_pages {
+    value_page,
     date_page,
-    payout_page,
     summary_page
 };
 /*
@@ -58,85 +56,74 @@ bool wpChangeInterestRate_IntroPage::validatePage()
 
 int wpChangeInterestRate_IntroPage::nextId() const
 {
-    return amount_page;
+    return value_page;
 }
 */
 ///////////////////////////////////////////
-/// wpChangeInterestRate_AmountPage
+/// wpChangeInterestRate_ValuePage
 ///////////////////////////////////////////
 
-wpChangeInterestRate_AmountPage::wpChangeInterestRate_AmountPage(QWidget* parent) : QWizardPage(parent)
+wpChangeInterestRate_ValuePage::wpChangeInterestRate_ValuePage(QWidget* parent) : QWizardPage(parent)
 {
-    subTitleLabel = new QLabel("Keine Daten!");
+    double maxValue =dbConfig::readValue(MAX_INTEREST).toDouble() / 100.;
+
+    setTitle(qsl("Zinssatz ändern"));
+
+
+
+    subTitleLabel = new QLabel(qsl("Keine Daten!"));
     subTitleLabel->setWordWrap(true);
 
     QVBoxLayout *layout = new QVBoxLayout;
     QLineEdit* le = new QLineEdit;
 
-    QDoubleValidator* dv =new QDoubleValidator(0., 100000000., 2, le);
+    QDoubleValidator* dv =new QDoubleValidator(0., maxValue, 2, le);
     le->setValidator(dv);
-    registerField(qsl("amount"), le);
+    registerField(qsl("value"), le);
 
     layout->addWidget(subTitleLabel);
     layout->addWidget(le);
     setLayout(layout);
 }
 
-void wpChangeInterestRate_AmountPage::initializePage()
+void wpChangeInterestRate_ValuePage::initializePage()
 {
-    bool isDeposit = field(fnDeposit_notPayment).toBool();
-    double minPayout =dbConfig::readValue(MIN_PAYOUT).toDouble();
-    double minAmount =dbConfig::readValue(MIN_AMOUNT).toDouble();
+    wizChangeInterestRate* wiz= qobject_cast<wizChangeInterestRate*>(this->wizard());
+    double maxValue =dbConfig::readValue(MAX_INTEREST).toDouble() / 100.;
     QLocale l;
-    if( isDeposit) {
-        setTitle(qsl("Einzahlungsbetrag"));
-        QString subt =qsl("Der Betrag muss größer als %1 sein.");
-        subt =subt.arg(d2euro(minPayout));
-        subTitleLabel->setText(subt);
-        setField(qsl("amount"), l.toString (1000.));
-    } else {
-        setTitle(qsl("Auszahlungsbetrag"));
-        wizChangeInterestRate* wiz= qobject_cast<wizChangeInterestRate*>(this->wizard());
-        double currentAmount = wiz->currentAmount;
-        // double minPayment = 100., minRemains = 500.;
-        double maxPayout = currentAmount - minAmount;
-        QString subtitle =qsl("Der Auszahlungsbetrag kann zwischen %1 und %2 liegen.");
-        subtitle = subtitle.arg(d2euro(minPayout), d2euro(maxPayout));
-        subTitleLabel->setText(subtitle);
-        setField(qsl("amount"), l.toString(minPayout));
-    }
+
+    setTitle(qsl("Zinssatz"));
+    QString subt = qsl("In dieser Dialogfolge kannst Du den Zinssatz zum Vertrag "
+                       "<br><b>%1</b> "
+                       "<br>von <b>%2</b> ändern."
+                       "<br>"
+                       "<br>Der aktuelle Zinssatz ist %3 ."
+                       "<br>Der maximale Zinssatz ist %4 .");
+    subt = subt.arg(wiz->contractLabel, wiz->creditorName, prozent2prozent_str(wiz->currentValue), prozent2prozent_str(maxValue));
+    subTitleLabel->setText(subt);
+    subTitleLabel->setWordWrap(true);
+    setField(qsl("value"), l.toString (wiz->currentValue));
 }
 
-bool wpChangeInterestRate_AmountPage::validatePage()
+bool wpChangeInterestRate_ValuePage::validatePage()
 {
+    double maxValue =dbConfig::readValue(MAX_INTEREST).toDouble();
     QLocale l;
-    bool isDeposit = field(fnDeposit_notPayment).toBool();
-    // cave! QLocale l ist notwendig, damit Werte mit Dezimalkomma (d) richtig "verstanden" werden
-    double amount = r2(l.toDouble(field(qsl("amount")).toString()));
 
-    if( isDeposit) {
-        if( amount <= 0)
+    // cave! QLocale l ist notwendig, damit Werte mit Dezimalkomma (d) richtig "verstanden" werden
+    double value = r2(l.toDouble(field(qsl("value")).toString()));
+
+    if( value < 0)
+        return false;
+    else {
+        if (value > maxValue)
             return false;
         else
             return true;
-    } else {
-        wizChangeInterestRate* wiz= qobject_cast<wizChangeInterestRate*>(this->wizard());
-        double currentAmount = wiz->currentAmount;
-        double minPayout =dbConfig::readValue(MIN_PAYOUT).toDouble();
-        double minAmount =dbConfig::readValue(MIN_AMOUNT).toDouble();
-        if( amount < minPayout) {
-            QMessageBox::information(this, qsl("Auszahlung nicht möglich"), qsl("Der Auszahlungsbetrag muss mindestens %1 betragen").arg(d2euro(minPayout)));
-            return false;
-        }
-        if( currentAmount-amount < minAmount) {
-            QMessageBox::information(this, qsl("Auszahlung nicht möglich"), qsl("Der Restbetrag muss mindestens %1 betragen").arg(d2euro(minAmount)));
-            return false;
-        }
     }
-    return true;
 }
 
-int wpChangeInterestRate_AmountPage::nextId() const
+int wpChangeInterestRate_ValuePage::nextId() const
 {
     return date_page;
 }
@@ -205,12 +192,9 @@ wpChangeInterestRate_Summary::wpChangeInterestRate_Summary(QWidget* p) : QWizard
 
 int wpChangeInterestRate_DatePage::nextId() const
 {
-    bool askForPayout =qobject_cast<wizChangeInterestRate*>(wizard())->interestPayoutPossible;
-    if( askForPayout)
-        return payout_page;
-    else
-        return summary_page;
+    return summary_page;
 }
+
 /*
 wpChangeInterestRate_PayoutInterestPage::wpChangeInterestRate_PayoutInterestPage(QWidget* p) : QWizardPage (p)
 {
@@ -238,24 +222,17 @@ void wpChangeInterestRate_Summary::initializePage()
     wizChangeInterestRate* wiz= qobject_cast<wizChangeInterestRate*>(this->wizard());
 
     QString subtitle =qsl("zum Vertrag <b>%1</b><p>von <b>%2</b>:<p>"
-                      "<table width=100%><tr><td align=center>Vorheriger Wert</td><td align=center>Änderungsbetrag</td><td align=center>neuer Wert</td></tr>"
-                      "<tr><td align=center>%3</td><td align=center>%4%5</td><td align=center>%6</td></tr></table>"
-                      "<p>Datum: %7</b>");
-    bool deposit = field(fnDeposit_notPayment).toBool();
-    double oldValue = wiz->currentAmount, newValue =0;
-    double change = QLocale().toDouble(field(qsl("amount")).toString());
-    if( deposit) {
-        setTitle(qsl("Zusammenfassung der Einzahlung"));
-        subtitle = qsl("Einzahlung ") +subtitle;
-        newValue = wiz->currentAmount + change;
-    } else {
-        setTitle(qsl("Zusammenfassung der Auszahlung"));
-        subtitle = qsl("Auszahlung ") +subtitle;
-        newValue = wiz->currentAmount - change;
-    }
-    subTitleLabel->setText(subtitle.arg(wiz->contractLabel, wiz->creditorName, d2euro(oldValue),
-                   deposit? qsl("+") : qsl("-"), d2euro(change),
-                   d2euro(newValue), field(qsl("date")).toDate().toString(qsl("dd.MM.yyyy"))));
+                      "<table width=100%><tr><td align=center>Vorheriger Zinssatz</td><td align=center>neuer Zinssatz</td></tr>"
+                      "<tr><td align=center>%3</td><td align=center>%5</td></tr></table>"
+                      "<p>Datum: %6</b>");
+    double oldValue = wiz->currentValue, newValue =0;
+    setTitle(qsl("Zusammenfassung der Einzahlung"));
+    subtitle = qsl("Einzahlung ") +subtitle;
+    newValue = wiz->newValue;
+ 
+    subTitleLabel->setText(subtitle.arg(wiz->contractLabel, wiz->creditorName, prozent2prozent_str(oldValue),
+                    prozent2prozent_str(newValue),
+                    field(qsl("date")).toDate().toString(qsl("dd.MM.yyyy"))));
 }
 bool wpChangeInterestRate_Summary::isComplete() const
 {
@@ -270,7 +247,7 @@ void wpChangeInterestRate_Summary::onConfirmData_toggled(int)
 wizChangeInterestRate::wizChangeInterestRate(QWidget* p) : QWizard(p)
 {
     QFont f =font(); f.setPointSize(10); setFont(f);
+    setPage(value_page, new wpChangeInterestRate_ValuePage);
     setPage(date_page, new wpChangeInterestRate_DatePage);
-    setPage(amount_page, new wpChangeInterestRate_AmountPage);
     setPage(summary_page, new wpChangeInterestRate_Summary);
 }

@@ -182,6 +182,21 @@ const booking contract::latestBooking()
     RETURN_OK (latestB, qsl("Latest Booking:"), qsl("Typ: "), bookingTypeDisplayString(latestB.type), qsl("/"), latestB.date.toString (Qt::ISODate), qsl("/"),
                          d2euro(latestB.amount), qsl("/"), qsl("cId:"), i2s(latestB.contractId));
 }
+const booking contract::latestInterestBooking()
+{
+    QString sql {qsl("SELECT id, %1, %2, %3, %4 FROM %6 WHERE %1=%5 AND (%3=%7 OR %3=%8) ORDER BY rowid DESC LIMIT 1").
+        arg(fn_bVertragsId, fn_bDatum, fn_bBuchungsArt, fn_bBetrag, id_aS(), isTerminated ? tn_ExBuchungen : tn_Buchungen,
+            bookingTypeToNbrString(bookingType::reInvestInterest),
+            bookingTypeToNbrString(bookingType::annualInterestDeposit))};
+    QSqlRecord rec = executeSingleRecordSql(sql);
+    if( 0 == rec.count()) {
+        RETURN_OK( booking(), qsl("latestBooking returns empty value"));
+    }
+    booking latestB(id(), bookingType(rec.value(fn_bBuchungsArt).toInt()), rec.value(fn_bDatum).toDate(), euroFromCt(rec.value(fn_bBetrag).toInt()));
+    RETURN_OK (latestB, qsl("Latest Booking:"), qsl("Typ: "), bookingTypeDisplayString(latestB.type), qsl("/"), latestB.date.toString (Qt::ISODate), qsl("/"),
+                         d2euro(latestB.amount), qsl("/"), qsl("cId:"), i2s(latestB.contractId));
+}
+
 
 // write to db
 tableindex_t contract::saveNewContract()
