@@ -379,10 +379,12 @@ void changeInterestRate(contract *pc) {
     wiz.earlierstDate = pc->latestInterestBooking().date;
     wiz.exec();
     if (wiz.field(qsl("confirmed")).toBool()) {
-        double interestRate{QLocale().toDouble(wiz.field(qsl("newValue")).toString())};
+        // double interestRate{QLocale().toDouble(wiz.field(qsl("newValue")).toString())};
+        double interestRate = wiz.newValue;
         QDate date{wiz.field(qsl("date")).toDate()};
         /* TODO: Book new value */
-        qInfo() << qsl("New interest rate: %1").arg(interestRate);
+        qInfo() << qsl("New interest rate:   %1").arg(interestRate);
+        qInfo() << qsl("Date of rate change: %1").arg(date.toString("dd.MM.yyyy"));
     } else
         qInfo() << "contract change was canceld by the user";
 

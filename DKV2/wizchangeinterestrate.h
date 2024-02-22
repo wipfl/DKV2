@@ -52,6 +52,7 @@ struct wizChangeInterestRate : public QWizard
     double newValue = 0.;
     double maxValue = 0.;
     QDate earlierstDate;
+    QDate date;
     Q_OBJECT;
 };
 

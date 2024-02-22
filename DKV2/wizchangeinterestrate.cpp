@@ -94,11 +94,11 @@ void wpChangeInterestRate_ValuePage::initializePage()
 
     setTitle(qsl("Zinssatz"));
     QString subt = qsl("In dieser Dialogfolge kannst Du den Zinssatz zum Vertrag "
-                       "<br><b>%1</b> "
-                       "<br>von <b>%2</b> ändern."
-                       "<br>"
-                       "<br>Der aktuelle Zinssatz ist %3 ."
-                       "<br>Der maximale Zinssatz ist %4 .");
+                       "<br/><b>%1</b> "
+                       "<br/>von <b>%2</b> ändern."
+                       "<br/>"
+                       "<br/>Der aktuelle Zinssatz ist %3 ."
+                       "<br/>Der maximale Zinssatz ist %4 .");
     subt = subt.arg(wiz->contractLabel, wiz->creditorName, prozent2prozent_str(wiz->currentValue), prozent2prozent_str(maxValue));
     subTitleLabel->setText(subt);
     subTitleLabel->setWordWrap(true);
@@ -107,20 +107,27 @@ void wpChangeInterestRate_ValuePage::initializePage()
 
 bool wpChangeInterestRate_ValuePage::validatePage()
 {
-    double maxValue =dbConfig::readValue(MAX_INTEREST).toDouble();
+    double maxValue =dbConfig::readValue(MAX_INTEREST).toDouble() / 100.;
     QLocale l;
 
     // cave! QLocale l ist notwendig, damit Werte mit Dezimalkomma (d) richtig "verstanden" werden
     double value = r2(l.toDouble(field(qsl("value")).toString()));
 
-    if( value < 0)
+    if( value < 0) {
+        QMessageBox::information(this, qsl("Falscher Zinssatz"), qsl("Der Zinssatz darf nicht negativ sein!"));
         return false;
-    else {
-        if (value > maxValue)
-            return false;
-        else
-            return true;
     }
+
+    wizChangeInterestRate* wiz= qobject_cast<wizChangeInterestRate*>(this->wizard());
+
+    if (value > maxValue) {
+        QMessageBox::information(this, qsl("Falscher Zinssatz"), 
+            qsl("Der Zinssatz darf nicht größer als %1 sein!").arg(prozent2prozent_str(maxValue)));
+        return false;
+    }
+
+    wiz->newValue = r2(l.toDouble(field(qsl("value")).toString()));
+    return true;
 }
 
 int wpChangeInterestRate_ValuePage::nextId() const
@@ -147,12 +154,12 @@ wpChangeInterestRate_DatePage::wpChangeInterestRate_DatePage(QWidget* parent) : 
 void wpChangeInterestRate_DatePage::initializePage()
 {
     wizChangeInterestRate* wiz= qobject_cast<wizChangeInterestRate*>(this->wizard());
-    QString subt=QString(qsl("Das früheste Datum für eine Zinsänderung ist der (%1), \n"
+    QString subt=QString(qsl("Das früheste Datum für eine Zinsänderung ist der <b>%1</b>), \n"
                              "da davor bereits Zinsen verbucht sind.")).arg(wiz->earlierstDate.toString(qsl("dd.MM.yyyy")));
 
     setTitle(qsl("Datum der Zinsänderung"));
-    subTitleLabel->setText(subt + qsl("<p>Gib das Datum der Zinsänderung an."
-                                        "<p>Die Zinsen werden ab dem Folgetag mit dem neuen Zinssatz berechnet!"));
+    subTitleLabel->setText(subt + qsl(  "<br></br>Gib das Datum der Zinsänderung an."
+                                        "<br></br>Die Zinsen werden ab dem Folgetag mit dem neuen Zinssatz berechnet!"));
     setField(qsl("date"), wiz->earlierstDate);
 }
 
@@ -164,14 +171,17 @@ bool wpChangeInterestRate_DatePage::validatePage()
 
     if( d < wiz->earlierstDate)
         msg =qsl("Das Vertragsdatum muss nach der letzten Buchung liegen");
-    if( d.month() == 12 and d.day() == 31)
-        // avoid interest bookings on the date of anual settlements.
-        // it is a holiday anyways
-        msg += qsl("Eine Ein- oder Auszahlung darf nicht am 31.12. sein");
+    // if( d.month() == 12 and d.day() == 31)
+    //     // avoid interest bookings on the date of anual settlements.
+    //     // it is a holiday anyways
+    //     msg += qsl("Eine Ein- oder Auszahlung darf nicht am 31.12. sein");
     if( not msg.isEmpty ()){
         QMessageBox::information (this, "Info", msg);
         return false;
     }
+
+    wiz->date = d;
+
     return true;
 }
 
@@ -223,17 +233,18 @@ void wpChangeInterestRate_Summary::initializePage()
 
     QString subtitle =qsl("zum Vertrag <b>%1</b><p>von <b>%2</b>:<p>"
                       "<table width=100%><tr><td align=center>Vorheriger Zinssatz</td><td align=center>neuer Zinssatz</td></tr>"
-                      "<tr><td align=center>%3</td><td align=center>%5</td></tr></table>"
-                      "<p>Datum: %6</b>");
+                      "<b><tr><td align=center>%3</td><td align=center>%4</td></tr></table>"
+                      "<p>Datum: %5</b>");
     double oldValue = wiz->currentValue, newValue =0;
-    setTitle(qsl("Zusammenfassung der Einzahlung"));
-    subtitle = qsl("Einzahlung ") +subtitle;
+    setTitle(qsl("Zusammenfassung der Zinsänderung"));
+    subtitle = qsl("Zinsänderung ") +subtitle;
     newValue = wiz->newValue;
  
-    subTitleLabel->setText(subtitle.arg(wiz->contractLabel, wiz->creditorName, prozent2prozent_str(oldValue),
-                    prozent2prozent_str(newValue),
-                    field(qsl("date")).toDate().toString(qsl("dd.MM.yyyy"))));
+    subTitleLabel->setText(subtitle.arg(wiz->contractLabel, wiz->creditorName, 
+                            prozent2prozent_str(oldValue), prozent2prozent_str(newValue),
+                            field(qsl("date")).toDate().toString(qsl("dd.MM.yyyy"))));
 }
+
 bool wpChangeInterestRate_Summary::isComplete() const
 {
     return field(qsl("confirmed")).toBool();

@@ -190,7 +190,9 @@ const booking contract::latestInterestBooking()
             bookingTypeToNbrString(bookingType::annualInterestDeposit))};
     QSqlRecord rec = executeSingleRecordSql(sql);
     if( 0 == rec.count()) {
-        RETURN_OK( booking(), qsl("latestBooking returns empty value"));
+        booking emptyBooking;
+        emptyBooking.date = initialPaymentReceived() ? initialPaymentDate() : conclusionDate();
+        RETURN_OK(emptyBooking, qsl("latestBooking returns empty value"));
     }
     booking latestB(id(), bookingType(rec.value(fn_bBuchungsArt).toInt()), rec.value(fn_bDatum).toDate(), euroFromCt(rec.value(fn_bBetrag).toInt()));
     RETURN_OK (latestB, qsl("Latest Booking:"), qsl("Typ: "), bookingTypeDisplayString(latestB.type), qsl("/"), latestB.date.toString (Qt::ISODate), qsl("/"),
