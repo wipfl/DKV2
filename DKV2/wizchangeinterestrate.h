@@ -2,7 +2,7 @@
 #define CHANGEINTERESTRATEWIZ_H
 
 #include "helper.h"
-
+#include "contract.h"
 
 struct wpChangeInterestRate_ValuePage : public QWizardPage
 {
@@ -20,6 +20,19 @@ private:
 struct wpChangeInterestRate_DatePage : public QWizardPage
 {
     wpChangeInterestRate_DatePage(QWidget* parent =nullptr);
+    void cleanupPage() override  {};
+    void initializePage() override;
+    bool validatePage() override;
+    int nextId() const override;
+    Q_OBJECT;
+
+private:
+    QLabel *subTitleLabel = nullptr;
+};
+
+struct wpChangeInterestRate_iModelPage : public QWizardPage
+{
+    wpChangeInterestRate_iModelPage(QWidget* parent =nullptr);
     void cleanupPage() override  {};
     void initializePage() override;
     bool validatePage() override;
@@ -51,6 +64,8 @@ struct wizChangeInterestRate : public QWizard
     double  currentValue = 0.;
     double newValue = 0.;
     double maxValue = 0.;
+    interestModel iModel = interestModel::zero;
+    
     QDate earlierstDate;
     QDate date;
     Q_OBJECT;
