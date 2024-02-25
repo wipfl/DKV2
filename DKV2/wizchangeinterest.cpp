@@ -82,13 +82,33 @@ int wpChangeInterest_DatePage::nextId() const
 /// wizChangeInterestRate
 ///////////////////////////////////////////
 
-wizChangeInterest::wizChangeInterest(creditor& c, QWidget* p) : wizNew::wizNew(c,p)
+wizChangeInterest::wizChangeInterest(creditor& c, contract& contr, QWidget* p) : wizNew::wizNew(c,p)
 {
-    // QFont f = font();
-    // f.setPointSize(10);
-    // setFont(f);
-    // Add new start dialog
     setPage(page_date_of_change, new wpChangeInterest_DatePage);
     setStartId(page_date_of_change);
     updateMode = true;
+    setField(pnFName, c.firstname());
+    setField(pnLName, c.lastname());
+    setField(pnStreet, c.street());
+    setField(pnPcode, c.postalCode());
+    setField(pnCity, c.city());
+    setField(pnCountry, c.country());
+    setField(pnEMail, c.email());
+    setField(pnPhone, c.tel());
+    setField(pnContact, c.contact());
+    setField(pnComment, c.comment());
+    setField(pnIban, c.iban());
+    setField(pnBic, c.bic());
+    setField(pnAccount, c.account());
+    setField(pnLabel, contr.label());
+    setField(pnAmount, contr.());
+    setField(pnContractComment, contr.contractComment());
+    setField(pnCDate, contr.startD());
+    setField(pnEDate, contr.endD());
+    setField(pnPeriod, contr.noticePeriod());
+    setField(pnConfirmContract, contr.confirmContract());
+    setField(pnIMode, contr.imode());
+    setField(pnIPaymentDelayed, contr.ipnd());
+
+
 }

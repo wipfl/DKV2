@@ -742,8 +742,13 @@ int wpInterestFromInvestment::nextId() const
     wizNew *wiz = qobject_cast<wizNew *>(wizard());
     if (wiz->interest == 0)
         return page_confirm_contract;
-    else
-        return page_interest_payment_mode;
+    else 
+    {
+        if (wiz->updateMode == true)
+            return page_confirm_contract;
+        else
+            return page_interest_payment_mode;
+    }
 }
 
 /*
@@ -789,7 +794,12 @@ int wpInterestSelection::nextId() const
     if (wiz->interest == 0)
         return page_confirm_contract;
     else
-        return page_interest_payment_mode;
+    {
+        if (wiz->updateMode == true)
+            return page_confirm_contract;
+        else
+            return page_interest_payment_mode;
+    }
 }
 
 /*

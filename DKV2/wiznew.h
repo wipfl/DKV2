@@ -239,7 +239,9 @@ private:
 
 struct wizNew : public QWizard
 {
-    wizNew(creditor& c, QWidget* p =nullptr);
+    friend class wpInterestFromInvestment;
+    friend class wpInterestSelection;
+    wizNew(creditor &c, QWidget *p = nullptr);
     tableindex_t existingCreditorId =SQLITE_invalidRowId;
     int interest =-1;
     tableindex_t investmentId =SQLITE_invalidRowId;

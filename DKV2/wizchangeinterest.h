@@ -27,7 +27,7 @@ private:
 
 struct wizChangeInterest : public wizNew
 {
-    wizChangeInterest(creditor& c, QWidget* p =nullptr);
+    wizChangeInterest(creditor& cred, contract& cont, QWidget* p =nullptr);
     QString creditorName;
     QString contractLabel;
     double  currentValue = 0.;
