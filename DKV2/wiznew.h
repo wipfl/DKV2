@@ -18,7 +18,9 @@ enum { page_new_or_existing,
        page_interest_from_investment,
        page_interest_value_selection,
        page_interest_payment_mode,
-       page_confirm_contract};
+       page_confirm_contract,
+       page_new_max
+       };
 
 
 inline const QString pnNew{qsl("create_new")};
@@ -248,6 +250,8 @@ struct wizNew : public QWizard
     bool selectCreateContract =true; // for edit creditor this should be false
 private:
     Q_OBJECT;
+
+protected:
     bool updateMode =false;
 };
 

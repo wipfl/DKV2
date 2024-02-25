@@ -5,6 +5,12 @@
 #include "contract.h"
 #include "wiznew.h"
 
+enum
+{
+    first_page = page_new_max,
+    page_date_of_change
+};
+
 struct wpChangeInterest_DatePage : public QWizardPage
 {
     wpChangeInterest_DatePage(QWidget* parent =nullptr);
@@ -21,7 +27,7 @@ private:
 
 struct wizChangeInterest : public wizNew
 {
-    wizChangeInterest(QWidget* p =nullptr);
+    wizChangeInterest(creditor& c, QWidget* p =nullptr);
     QString creditorName;
     QString contractLabel;
     double  currentValue = 0.;

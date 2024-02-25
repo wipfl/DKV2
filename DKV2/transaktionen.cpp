@@ -18,7 +18,7 @@
 #include "wizactivatecontract.h"
 #include "wizcancelcontract.h"
 #include "wizchangecontractvalue.h"
-#include "wizchangeinterestrate.h"
+#include "wizchangeinterest.h"
 #include "wizterminatecontract.h"
 // #include "wizannualsettlement.h"
 #include "busycursor.h"
@@ -372,11 +372,11 @@ void changeInterestRate(contract *pc) {
     }
 
     creditor cre(pc->creditorId());
-    wizChangeInterestRate wiz(getMainWindow());
+    wizChangeInterest wiz(cre, getMainWindow());
     wiz.creditorName = cre.firstname() + qsl(" ") + cre.lastname();
     wiz.contractLabel = pc->label();
     wiz.currentValue = pc->interestRate();
-    wiz.earlierstDate = pc->latestInterestBooking().date;
+    wiz.earliestDate = pc->latestInterestBooking().date;
     wiz.exec();
     if (wiz.field(qsl("confirmed")).toBool()) {
         // double interestRate{QLocale().toDouble(wiz.field(qsl("newValue")).toString())};
