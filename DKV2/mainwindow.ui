@@ -843,10 +843,13 @@
   </action>
   <action name="action_cmenu_change_interestRate">
    <property name="text">
-    <string>Zinssatz ändern</string>
+    <string>Zinssatz &amp; Anlage ändern</string>
+   </property>
+   <property name="iconText">
+    <string>Zinssatz &amp; Anlage ändern</string>
    </property>
    <property name="toolTip">
-    <string>Zinssatz ändern</string>
+    <string>Zinssatz &amp; Anlage ändern</string>
    </property>
   </action>
  </widget>

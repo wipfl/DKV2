@@ -11,6 +11,8 @@ enum
     page_date_of_change
 };
 
+inline const QString pnChangeDate{qsl("changeDate")};
+
 struct wpChangeInterest_DatePage : public QWizardPage
 {
     wpChangeInterest_DatePage(QWidget* parent =nullptr);
@@ -24,10 +26,26 @@ private:
     QLabel *subTitleLabel = nullptr;
 };
 
+/*
+ * wpContractConfirmation get users confirmation
+ */
+class wpChangeInterest_ConfirmPage : public QWizardPage
+{
+    Q_OBJECT;
+public:
+    wpChangeInterest_ConfirmPage(QWidget*);
+    void onConfirmChangeInterest_toggled(int state);
+
+    void initializePage() override;
+    bool isComplete() const override;
+private:
+    bool confirmed = false;
+    QLabel *subTitleLabel = new QLabel(qsl(""));
+};
 
 struct wizChangeInterest : public wizNew
 {
-    wizChangeInterest(creditor& cred, contract& cont, QWidget* p =nullptr);
+    wizChangeInterest(creditor& cred, contract* cont, QWidget* p =nullptr);
     QString creditorName;
     QString contractLabel;
     double  currentValue = 0.;
@@ -36,7 +54,7 @@ struct wizChangeInterest : public wizNew
     interestModel iModel = interestModel::zero;
     
     QDate earliestDate;
-    QDate date;
+    QDate changeDate;
     Q_OBJECT;
 };
 

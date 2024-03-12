@@ -19,6 +19,7 @@ enum { page_new_or_existing,
        page_interest_value_selection,
        page_interest_payment_mode,
        page_confirm_contract,
+       page_confirm_change_interest,    // last page for wizchangeinterest
        page_new_max
        };
 

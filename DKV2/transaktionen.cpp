@@ -365,14 +365,14 @@ void changeContractValue(contract *pc) {
 
 void changeInterestRate(contract *pc) {
     LOG_CALL;
-    if (not pc->initialPaymentReceived()) {
-        qCritical() << "tried to changeContractValue of an inactive contract";
-        Q_ASSERT(false);
-        return;
-    }
+    // if (not pc->initialPaymentReceived()) {
+    //     qCritical() << "tried to changeContractValue of an inactive contract";
+    //     Q_ASSERT(false);
+    //     return;
+    // }
 
     creditor cre(pc->creditorId());
-    wizChangeInterest wiz(cre, getMainWindow());
+    wizChangeInterest wiz( cre, pc, getMainWindow() );
     wiz.creditorName = cre.firstname() + qsl(" ") + cre.lastname();
     wiz.contractLabel = pc->label();
     wiz.currentValue = pc->interestRate();

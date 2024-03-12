@@ -19,12 +19,12 @@ enum change_value_pages {
 
 wpChangeInterest_DatePage::wpChangeInterest_DatePage(QWidget* parent) : QWizardPage(parent)
 {
-    subTitleLabel = new QLabel(qsl("Keine Daten!"));
+    subTitleLabel = new QLabel(qsl(""));
     subTitleLabel->setWordWrap(true);
 
     QDateEdit *de = new QDateEdit;
     de->setDisplayFormat(qsl("dd.MM.yyyy"));
-    registerField(qsl("date"), de);
+    registerField(pnChangeDate, de);
 
     QVBoxLayout*  layout = new QVBoxLayout;
     layout->addWidget(subTitleLabel);
@@ -41,13 +41,13 @@ void wpChangeInterest_DatePage::initializePage()
     setTitle(qsl("Datum der Zinsänderung"));
     subTitleLabel->setText(subt + qsl(  "<br></br>Gib das Datum der Zinsänderung an."
                                         "<br></br>Die Zinsen werden ab dem Folgetag mit dem neuen Zinssatz berechnet!"));
-    setField(qsl("date"), wiz->earliestDate);
+    setField(pnChangeDate, wiz->earliestDate);
 }
 
 bool wpChangeInterest_DatePage::validatePage()
 {
     wizChangeInterest* wiz= qobject_cast<wizChangeInterest*>(this->wizard());
-    QDate d {field(qsl("date")).toDate()};
+    QDate d {field(pnChangeDate).toDate()};
     QString msg;
 
     if( d < wiz->earliestDate)
@@ -61,8 +61,8 @@ bool wpChangeInterest_DatePage::validatePage()
         return false;
     }
 
-    wiz->date = d;
-
+    setField(pnChangeDate, d);
+    setField(pnCDate, d);
     return true;
 }
 
@@ -77,15 +77,81 @@ int wpChangeInterest_DatePage::nextId() const
     return page_interest_selection_Mode;
 }
 
+/*
+* wpChangeInterest_ConfirmPage  -confirm the change data
+*/
+wpChangeInterest_ConfirmPage::wpChangeInterest_ConfirmPage(QWidget *p) : QWizardPage(p)
+{
+    LOG_CALL;
+    setTitle(qsl("Bestätige die Vertragsdaten"));
+    QCheckBox *cbConfirm = new QCheckBox(qsl("Die Angaben sind korrekt!"));
+    cbConfirm->setCheckState(Qt::CheckState::Unchecked);
+    registerField(pnConfirmContract + qsl("*"), cbConfirm);
+
+    QVBoxLayout *bl = new QVBoxLayout;
+    bl->addWidget(subTitleLabel);
+    bl->addWidget(cbConfirm);
+    setLayout(bl);
+    connect(cbConfirm, &QCheckBox::stateChanged, this, &wpChangeInterest_ConfirmPage::onConfirmChangeInterest_toggled);
+    setCommitPage(true);
+    
+}
+
+bool wpChangeInterest_ConfirmPage::isComplete() const
+{
+    return confirmed;
+}
+
+void wpChangeInterest_ConfirmPage::onConfirmChangeInterest_toggled(int state)
+{
+    LOG_CALL;
+
+    confirmed = state;
+    completeChanged();
+}
+
+void wpChangeInterest_ConfirmPage::initializePage()
+{
+    LOG_CALL;
+
+    QString summary{qsl("Vertrag <b>%3</b> von <b>%1 %2</b> <p><table>"
+                        "<tr><td>Betrag: </td><td><b>%4</b><br/></td></tr>"
+                        "<tr><td>Änderungsdatum: </td><td><b>%5</b></td></tr>"
+                        "<tr><td>Zinssatz: </td><td><b>%6 %</b></td></tr>"
+                        // "<tr><td>Zinsanrechnung: </td><td><b>%6<p></b></td></tr>"
+                        "</table>")};
+    QLocale l;
+
+    wizNew *wiz = qobject_cast<wizNew *>(wizard());
+    if (wiz)
+    {
+        interestModel iMode{wiz->iPaymentMode};
+        QString interestMode = interestModelDisplayString(iMode);
+        subTitleLabel->setText(
+            summary.arg(field(pnFName).toString(), field(pnLName).toString(), field(pnLabel).toString(), 
+            d2euro(l.toDouble (field(pnAmount).toString())),
+            field(pnChangeDate).toDate().toString(qsl("dd.MM.yyyy")), 
+            QString::number(wiz->interest / 100., 'f', 2), 
+            interestMode));
+
+
+        wiz->button(QWizard::CommitButton)->setText("OK");
+        wiz->button(QWizard::CommitButton)->setDisabled(true);
+    }
+    else
+        Q_ASSERT(false);
+}
 
 ///////////////////////////////////////////
 /// wizChangeInterestRate
 ///////////////////////////////////////////
 
-wizChangeInterest::wizChangeInterest(creditor& c, contract& contr, QWidget* p) : wizNew::wizNew(c,p)
+wizChangeInterest::wizChangeInterest(creditor& c, contract* contr, QWidget* p) : wizNew::wizNew(c,p)
 {
-    setPage(page_date_of_change, new wpChangeInterest_DatePage);
+    setPage(page_date_of_change, new wpChangeInterest_DatePage(this));
+    setPage(page_confirm_change_interest, new wpChangeInterest_ConfirmPage(this));
     setStartId(page_date_of_change);
+
     updateMode = true;
     setField(pnFName, c.firstname());
     setField(pnLName, c.lastname());
@@ -100,15 +166,12 @@ wizChangeInterest::wizChangeInterest(creditor& c, contract& contr, QWidget* p) :
     setField(pnIban, c.iban());
     setField(pnBic, c.bic());
     setField(pnAccount, c.account());
-    setField(pnLabel, contr.label());
-    setField(pnAmount, contr.());
-    setField(pnContractComment, contr.contractComment());
-    setField(pnCDate, contr.startD());
-    setField(pnEDate, contr.endD());
-    setField(pnPeriod, contr.noticePeriod());
-    setField(pnConfirmContract, contr.confirmContract());
-    setField(pnIMode, contr.imode());
-    setField(pnIPaymentDelayed, contr.ipnd());
 
+    setField(pnLabel, contr->label());
+    setField(pnAmount, contr->plannedInvest());
+    setField(pnContractComment, contr->comment());
+    setField(pnCDate, contr->conclusionDate());
+    setField(pnEDate, contr->plannedEndDate());
+    setField(pnPeriod, contr->noticePeriod());
 
 }
