@@ -12,6 +12,7 @@ enum
 };
 
 inline const QString pnChangeDate{qsl("changeDate")};
+inline const QString pnConfirmChange{qsl("confirmChangeInterest")};
 
 struct wpChangeInterest_DatePage : public QWizardPage
 {
@@ -37,9 +38,8 @@ public:
     void onConfirmChangeInterest_toggled(int state);
 
     void initializePage() override;
-    bool isComplete() const override;
+
 private:
-    bool confirmed = false;
     QLabel *subTitleLabel = new QLabel(qsl(""));
 };
 
@@ -52,9 +52,9 @@ struct wizChangeInterest : public wizNew
     double newValue = 0.;
     double maxValue = 0.;
     interestModel iModel = interestModel::zero;
-    
     QDate earliestDate;
     QDate changeDate;
+    bool confirmed = false;
     Q_OBJECT;
 };
 

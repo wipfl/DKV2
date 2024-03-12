@@ -351,7 +351,9 @@ void changeContractValue(contract *pc) {
 
     wiz.exec();
     qInfo() << wiz.field(fnPayoutInterest);
-    if (wiz.field(qsl("confirmed")).toBool()) {
+    bool confirmed = wiz.field(pnConfirmChange).toBool();
+    if (confirmed)
+    {
         double amount{QLocale().toDouble(wiz.field(qsl("amount")).toString())};
         QDate date{wiz.field(qsl("date")).toDate()};
         if (wiz.field(qsl("deposit_notPayment")).toBool()) {
@@ -359,7 +361,8 @@ void changeContractValue(contract *pc) {
         } else {
             pc->payout(date, amount, wiz.field(fnPayoutInterest).toBool());
         }
-    } else
+    }
+    else
         qInfo() << "contract change was canceld by the user";
 }
 
@@ -378,14 +381,16 @@ void changeInterestRate(contract *pc) {
     wiz.currentValue = pc->interestRate();
     wiz.earliestDate = pc->latestInterestBooking().date;
     wiz.exec();
-    if (wiz.field(qsl("confirmed")).toBool()) {
+    if (wiz.field(pnConfirmChange).toBool())
+    {
         // double interestRate{QLocale().toDouble(wiz.field(qsl("newValue")).toString())};
         double interestRate = wiz.newValue;
         QDate date{wiz.field(qsl("date")).toDate()};
         /* TODO: Book new value */
         qInfo() << qsl("New interest rate:   %1").arg(interestRate);
         qInfo() << qsl("Date of rate change: %1").arg(date.toString("dd.MM.yyyy"));
-    } else
+    }
+    else
         qInfo() << "contract change was canceld by the user";
 
 }

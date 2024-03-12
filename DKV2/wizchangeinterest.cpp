@@ -86,28 +86,28 @@ wpChangeInterest_ConfirmPage::wpChangeInterest_ConfirmPage(QWidget *p) : QWizard
     setTitle(qsl("Bestätige die Vertragsdaten"));
     QCheckBox *cbConfirm = new QCheckBox(qsl("Die Angaben sind korrekt!"));
     cbConfirm->setCheckState(Qt::CheckState::Unchecked);
-    registerField(pnConfirmContract + qsl("*"), cbConfirm);
+    registerField(pnConfirmChange + qsl("*"), cbConfirm);
 
     QVBoxLayout *bl = new QVBoxLayout;
     bl->addWidget(subTitleLabel);
     bl->addWidget(cbConfirm);
     setLayout(bl);
     connect(cbConfirm, &QCheckBox::stateChanged, this, &wpChangeInterest_ConfirmPage::onConfirmChangeInterest_toggled);
-    setCommitPage(true);
-    
-}
-
-bool wpChangeInterest_ConfirmPage::isComplete() const
-{
-    return confirmed;
+    onConfirmChangeInterest_toggled(false);
 }
 
 void wpChangeInterest_ConfirmPage::onConfirmChangeInterest_toggled(int state)
 {
     LOG_CALL;
+    wizChangeInterest *wiz = qobject_cast<wizChangeInterest *>(wizard());
+    setFinalPage(state);
 
-    confirmed = state;
-    completeChanged();
+    if (wiz)
+    {
+        wiz->button(QWizard::CommitButton)->hide();
+        wiz->button(QWizard::NextButton)->hide();
+        wiz->button(QWizard::FinishButton)->show();
+    }
 }
 
 void wpChangeInterest_ConfirmPage::initializePage()
@@ -122,7 +122,7 @@ void wpChangeInterest_ConfirmPage::initializePage()
                         "</table>")};
     QLocale l;
 
-    wizNew *wiz = qobject_cast<wizNew *>(wizard());
+    wizChangeInterest *wiz = qobject_cast<wizChangeInterest *>(wizard());
     if (wiz)
     {
         interestModel iMode{wiz->iPaymentMode};
@@ -134,16 +134,15 @@ void wpChangeInterest_ConfirmPage::initializePage()
             QString::number(wiz->interest / 100., 'f', 2), 
             interestMode));
 
-
-        wiz->button(QWizard::CommitButton)->setText("OK");
-        wiz->button(QWizard::CommitButton)->setDisabled(true);
+        // setCommitPage(true);
+ 
     }
     else
         Q_ASSERT(false);
 }
 
 ///////////////////////////////////////////
-/// wizChangeInterestRate
+/// wizChangeInterest
 ///////////////////////////////////////////
 
 wizChangeInterest::wizChangeInterest(creditor& c, contract* contr, QWidget* p) : wizNew::wizNew(c,p)
