@@ -199,6 +199,7 @@ private:
  */
 struct wpInterestSelection : public QWizardPage {
     wpInterestSelection(QWidget* p);
+    void initializePage() override;
     bool validatePage() override;
     int nextId() const    override;
 private:

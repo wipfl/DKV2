@@ -751,6 +751,8 @@ int wpInterestFromInvestment::nextId() const
     }
 }
 
+#define INTEREST_COMBOBOX 0
+#if INTEREST_COMBOBOX
 /*
  * wpNewContractInterest - interest value from Investment or comboBox, interest mode
 */
@@ -777,6 +779,11 @@ wpInterestSelection::wpInterestSelection(QWidget *w) : QWizardPage(w)
     hbl->addWidget(cbInterest);
     setLayout(hbl);
 }
+void wpInterestSelection::initializePage()
+{
+/* nothing to do here */
+}
+
 bool wpInterestSelection::validatePage()
 {
     // without interest -> interest payout mode "payout"
@@ -801,6 +808,90 @@ int wpInterestSelection::nextId() const
             return page_interest_payment_mode;
     }
 }
+#else
+const QString pnInterestValue{qsl("iValue")};
+
+wpInterestSelection::wpInterestSelection(QWidget *w) : QWizardPage(w)
+{
+    QVBoxLayout *layout = new QVBoxLayout;
+
+    setTitle(qsl("Zinssatz"));
+    subTitleLabel->setWordWrap(true);
+    subTitleLabel->setText(qsl("Gib den Zinssatz in \% ein"));
+
+    QLineEdit* le = new QLineEdit;
+    QLabel *lZ = new QLabel(qsl("Zinssatz"));
+    lZ->setBuddy(le);
+    const int max_interest = dbConfig::readValue(MAX_INTEREST).toInt();
+
+    QDoubleValidator *dv = new QDoubleValidator(0., double(max_interest) / 100., 2, le);
+    le->setValidator(dv);
+    registerField(pnInterestValue, le);
+
+    layout->addWidget(subTitleLabel);
+    layout->addWidget(le);
+    setLayout(layout);
+}
+
+void wpInterestSelection::initializePage()
+{
+    wizNew *wiz = qobject_cast<wizNew *>(wizard());
+    QLocale l;
+
+    const int max_interest = dbConfig::readValue(MAX_INTEREST).toInt();
+    wiz->interest = max_interest / 2;
+    setField(pnInterestValue, l.toString(wiz->interest / 100.));
+
+}
+bool wpInterestSelection::validatePage()
+{
+    // without interest -> interest payout mode "payout"
+    wizNew *wiz = qobject_cast<wizNew *>(wizard());
+    QLocale l;
+    QString msg;
+
+    const int max_interest = dbConfig::readValue(MAX_INTEREST).toInt();
+    double iValue = r2(l.toDouble(field(pnInterestValue).toString()));
+
+    int interestIndex = qRound( iValue * 100.);
+
+    if (interestIndex > max_interest) {
+        msg = qsl("Der Zinssatz darf nicht größer sein als der konfigurierte Maximalwert "
+                  "von ") +
+              l.toString(max_interest / 100., 'g', 2) + qsl(" \%.");
+    }
+    else if (interestIndex < 0 )
+        msg = qsl("Der Zinssatz darf nicht negativ sein.");
+
+    if (msg.size())
+        {
+            QMessageBox::critical(this, qsl("Fehler"), msg);
+            return false;
+        }
+
+    wiz->interest = interestIndex;
+    if (wiz->interest == 0)
+        wiz->iPaymentMode = interestModel::zero;
+    else
+        wiz->iPaymentMode = interestModel::payout; // default for the next wiz page
+    return true;
+}
+int wpInterestSelection::nextId() const
+{
+    wizNew *wiz = qobject_cast<wizNew *>(wizard());
+
+    if (wiz->interest == 0)
+        return page_confirm_contract;
+    else
+    {
+        if (wiz->updateMode == true)
+            return page_confirm_change_interest;
+        else
+            return page_interest_payment_mode;
+    }
+}
+#endif
+
 
 /*
  * wpInterestMode - kein Zins? thesaurierend? Auszahlend? Fix?
